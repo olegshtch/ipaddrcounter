@@ -23,9 +23,21 @@ public class App {
     
     public static void readIPs(InputStream is) throws IOException {
         try (var bis = new BufferedInputStream(is)) {
+            int currentByte = 0;
+            byte[] bytes = new byte[4];
+
             int ch;
             while ((ch = bis.read()) != -1) {
-                
+                if (ch == (int)'.') {
+                    currentByte++;
+                } else if (ch == (int)'\n') {
+                    // ToDo: process IP
+                    System.out.println("Line: " + (bytes[0] & 0xff) + "." + (bytes[1] & 0xff) + "." + (bytes[2] & 0xff) + "."+ (bytes[3] & 0xff));
+                    currentByte = 0;
+                    bytes[0] = bytes[1] = bytes[2] = bytes[3] = 0;
+                } else if (ch >= (int)'0' && ch <= (int)'9') {
+                    bytes[currentByte] = (byte)(bytes[currentByte] * 10 + (ch - (int)'0'));
+                }
             }
         }
     }
