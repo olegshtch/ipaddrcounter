@@ -3,14 +3,34 @@
  */
 package home.tests.ipaddrcounter;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.File;
+import java.io.InputStream;
 import java.io.IOException;
 import java.util.zip.ZipFile;
 
 public class App {
+    
+    public static void readIPs(InputStream is) throws IOException {
+        try (var rdr = new InputStreamReader(is);
+                var brdr = new BufferedReader(rdr)) {
+            String line;
+            while ((line = brdr.readLine()) != null) {
+                System.out.println(line);
+            }
+        }
+    }
+    
     public static void main(String[] args) throws IOException {
-        try(var zip = new ZipFile(new File(args[0]), ZipFile.OPEN_READ)) {
-            
+        try (var zip = new ZipFile(new File(args[0]), ZipFile.OPEN_READ)) {
+            var entries = zip.entries();
+            if (entries.hasMoreElements()) {
+                var entry = entries.nextElement();
+                try (var is = zip.getInputStream(entry)) {
+                    readIPs(is);
+                }
+            }
         }
     }
 }
