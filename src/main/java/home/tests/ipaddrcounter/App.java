@@ -3,21 +3,29 @@
  */
 package home.tests.ipaddrcounter;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
+import java.util.BitSet;
 import java.util.zip.ZipFile;
 
 public class App {
+
+    // leaf of IPs trees means all children are set
+    private static final Object ALL_NODES = new Object();
+
+    // Tree of IPs
+    // null - no children are set
+    // ALL_NODES - all childre are set
+    // BitSet(256) - otherwise
+    private static Object TREE = null;
     
     public static void readIPs(InputStream is) throws IOException {
-        try (var rdr = new InputStreamReader(is);
-                var brdr = new BufferedReader(rdr)) {
-            String line;
-            while ((line = brdr.readLine()) != null) {
-                System.out.println(line);
+        try (var bis = new BufferedInputStream(is)) {
+            int ch;
+            while ((ch = bis.read()) != -1) {
+                
             }
         }
     }
