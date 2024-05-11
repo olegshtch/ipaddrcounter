@@ -177,6 +177,24 @@ public class App {
         }
     }
     
+    public static long countIPs(Object tree, long all_nodes_count) {
+        if (tree == ALL_NODES) {
+            return all_nodes_count;
+        }
+        if (tree == null) {
+            return 0L;
+        }
+        long sum = 0;
+        if (tree instanceof Object[] arr) {
+            for (int i = 0; i < 256; i++) {
+                sum += countIPs(arr[i], all_nodes_count / 256);
+            }
+        } else if (tree instanceof BitSet set) {
+            sum += set.cardinality();
+        }
+        return sum;
+    }
+    
     public static void main(String[] args) throws IOException {
         try (var zip = new ZipFile(new File(args[0]), ZipFile.OPEN_READ)) {
             var entries = zip.entries();
@@ -185,6 +203,7 @@ public class App {
                 try (var is = zip.getInputStream(entry)) {
                     readIPs(is);
                 }
+                System.out.println("Count: " + countIPs(TREE, 256L*256*256*256));
             }
         }
     }
