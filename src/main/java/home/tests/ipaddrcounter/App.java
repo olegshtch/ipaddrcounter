@@ -14,7 +14,7 @@ import java.util.zip.ZipFile;
 public class App {
 
     // leaf of IPs trees means all children are set
-    private static final Object ALL_NODES = new Object();
+    static final Object ALL_NODES = new Object();
     
     // temp objects to reduce allocations
     private static BitSet BITSET_POOL = null;
@@ -75,14 +75,14 @@ public class App {
         if (treeArr[ip0] == ALL_NODES) {
             return tree;
         }
-        boolean noFresh1 = false; // if is's just created then don't check for compression
+        boolean noFresh1 = true; // if is's just created then don't check for compression
         Object[] treeArr1;
         if (treeArr[ip0] instanceof Object[] arr) {
             treeArr1 = arr;
         } else if (treeArr[ip0] == null) {
             treeArr1 = getNewObjects();
             treeArr[ip0] = treeArr1;
-            noFresh1 = true;
+            noFresh1 = false;
         } else {
             return tree;
         }
@@ -92,14 +92,14 @@ public class App {
         if (treeArr1[ip1] == ALL_NODES) {
             return tree;
         }
-        boolean noFresh2 = false; // if is's just created then don't check for compression
+        boolean noFresh2 = true; // if is's just created then don't check for compression
         Object[] treeArr2;
         if (treeArr1[ip1] instanceof Object[] arr) {
             treeArr2 = arr;
         } else if (treeArr1[ip1] == null) {
             treeArr2 = getNewObjects();
             treeArr1[ip1] = treeArr2;
-            noFresh2 = true;
+            noFresh2 = false;
         } else {
             return tree;
         }
@@ -116,7 +116,7 @@ public class App {
         } else if (treeArr2[ip2] == null) {
             treeArr3 = getNewBitSet();
             treeArr2[ip2] = treeArr3;
-            noFresh3 = true;
+            noFresh3 = false;
         } else {
             return tree;
         }

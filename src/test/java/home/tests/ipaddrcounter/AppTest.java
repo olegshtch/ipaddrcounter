@@ -36,6 +36,22 @@ public final class AppTest {
         treeArr = Assertions.assertInstanceOf(Object[].class, treeArr[1]);
         treeArr = Assertions.assertInstanceOf(Object[].class, treeArr[2]);
         // check if it's ALL_NODES object
-        Assertions.assertEquals(Object.class, treeArr[3].getClass());
+        Assertions.assertEquals(App.ALL_NODES, treeArr[3]);
+    }
+    
+    @Test
+    public void testBlockTwo() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 256; ++i) {
+            for (int j = 0; j < 256; ++j) {
+                sb.append("1.2.").append(j).append('.').append(i).append('\n');
+            }
+        }
+        Object tree = App.readIPs(new ByteArrayInputStream(sb.toString().getBytes()));
+        Assertions.assertEquals(256*256, App.countIPs(tree, 256L*256*256*256));
+        Object[] treeArr = Assertions.assertInstanceOf(Object[].class, tree);
+        treeArr = Assertions.assertInstanceOf(Object[].class, treeArr[1]);
+        // check if it's ALL_NODES object
+        Assertions.assertEquals(App.ALL_NODES, treeArr[2]);
     }
 }
