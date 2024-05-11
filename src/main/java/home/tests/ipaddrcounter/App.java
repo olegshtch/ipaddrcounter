@@ -40,7 +40,7 @@ public class App {
         if (BITSET_POOL != null) {
             var result = BITSET_POOL;
             BITSET_POOL = null;
-            result.set(0, 255, false);
+            result.set(0, 256, false);
             return result;
         }
         return new BitSet(256);

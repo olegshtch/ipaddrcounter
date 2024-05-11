@@ -1,5 +1,6 @@
 package home.tests.ipaddrcounter;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -21,5 +22,20 @@ public final class AppTest {
     public void testFew() throws IOException {
         Object tree = App.readIPs(AppTest.class.getResourceAsStream("/few.txt"));
         Assertions.assertEquals(2, App.countIPs(tree, 256L*256*256*256));
+    }
+    
+    @Test
+    public void testBlock() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 256; ++i) {
+            sb.append("1.2.3.").append(i).append('\n');
+        }
+        Object tree = App.readIPs(new ByteArrayInputStream(sb.toString().getBytes()));
+        Assertions.assertEquals(256, App.countIPs(tree, 256L*256*256*256));
+        Object[] treeArr = Assertions.assertInstanceOf(Object[].class, tree);
+        treeArr = Assertions.assertInstanceOf(Object[].class, treeArr[1]);
+        treeArr = Assertions.assertInstanceOf(Object[].class, treeArr[2]);
+        // check if it's ALL_NODES object
+        Assertions.assertEquals(Object.class, treeArr[3].getClass());
     }
 }
