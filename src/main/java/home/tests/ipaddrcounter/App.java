@@ -179,12 +179,17 @@ public class App {
                 } else if (ch == (int)'\n') {
                     // ToDo: process IP
                     //System.out.println("Line: " + (bytes[0] & 0xff) + "." + (bytes[1] & 0xff) + "." + (bytes[2] & 0xff) + "."+ (bytes[3] & 0xff));
-                    tree = insertIP(bytes, tree);
+                    if (currentByte == 3) {
+                        tree = insertIP(bytes, tree);
+                    }
                     currentByte = 0;
                     bytes[0] = bytes[1] = bytes[2] = bytes[3] = 0;
                 } else if (ch >= (int)'0' && ch <= (int)'9') {
                     bytes[currentByte] = (byte)(bytes[currentByte] * 10 + (ch - (int)'0'));
                 }
+            }
+            if (currentByte == 3) {
+                tree = insertIP(bytes, tree);
             }
             return tree;
         }
