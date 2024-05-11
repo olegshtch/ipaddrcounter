@@ -65,58 +65,62 @@ public class App {
         }
 
         // level 1
-        if (treeArr[ip[0]] == ALL_NODES) {
+        final int ip0 = ip[0] & 0xff;
+        if (treeArr[ip0] == ALL_NODES) {
             return;
         }
         boolean noFresh1 = false; // if is's just created then don't check for compression
         Object[] treeArr1;
-        if (treeArr[ip[0]] instanceof Object[] arr) {
+        if (treeArr[ip0] instanceof Object[] arr) {
             treeArr1 = arr;
-        } else if (treeArr[ip[0]] == null) {
+        } else if (treeArr[ip0] == null) {
             treeArr1 = getNewObjects();
-            treeArr[ip[0]] = treeArr1;
+            treeArr[ip0] = treeArr1;
             noFresh1 = true;
         } else {
             return;
         }
         
         // level 2
-        if (treeArr1[ip[1]] == ALL_NODES) {
+        final int ip1 = ip[1] & 0xff;
+        if (treeArr1[ip1] == ALL_NODES) {
             return;
         }
         boolean noFresh2 = false; // if is's just created then don't check for compression
         Object[] treeArr2;
-        if (treeArr1[ip[1]] instanceof Object[] arr) {
+        if (treeArr1[ip1] instanceof Object[] arr) {
             treeArr2 = arr;
-        } else if (treeArr1[ip[1]] == null) {
+        } else if (treeArr1[ip1] == null) {
             treeArr2 = getNewObjects();
-            treeArr1[ip[1]] = treeArr2;
+            treeArr1[ip1] = treeArr2;
             noFresh2 = true;
         } else {
             return;
         }
         
         // leaves
-        if (treeArr2[ip[2]] == ALL_NODES) {
+        final int ip2 = ip[2] & 0xff;
+        if (treeArr2[ip2] == ALL_NODES) {
             return;
         }
         boolean noFresh3 = true; // if is's just created then don't check for compression
         BitSet treeArr3;
-        if (treeArr2[ip[2]] instanceof BitSet arr) {
+        if (treeArr2[ip2] instanceof BitSet arr) {
             treeArr3 = arr;
-        } else if (treeArr1[ip[1]] == null) {
+        } else if (treeArr2[ip2] == null) {
             treeArr3 = getNewBitSet();
-            treeArr2[ip[2]] = treeArr3;
+            treeArr2[ip2] = treeArr3;
             noFresh3 = true;
         } else {
             return;
         }
-        treeArr3.set(ip[3]);
+        final int ip3 = ip[3] & 0xff;
+        treeArr3.set(ip3);
         
         // compress
         if (noFresh3 && treeArr3.cardinality() == 256) {
             BITSET_POOL = treeArr3;
-            treeArr2[ip[2]] = ALL_NODES;
+            treeArr2[ip2] = ALL_NODES;
         } else {
             return;
         }
@@ -128,7 +132,7 @@ public class App {
                 }
             }
             ARRAY_POOL = treeArr2;
-            treeArr1[ip[1]] = ALL_NODES;
+            treeArr1[ip1] = ALL_NODES;
         } else {
             return;
         }
@@ -140,7 +144,7 @@ public class App {
                 }
             }
             ARRAY_POOL = treeArr1;
-            treeArr[ip[0]] = ALL_NODES;           
+            treeArr[ip0] = ALL_NODES;           
         } else {
             return;
         }
