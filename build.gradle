@@ -10,6 +10,10 @@ plugins {
     id 'application'
 }
 
+repositories {
+    mavenCentral()
+}
+
 // Apply a specific Java toolchain to ease working on different environments.
 java {
     toolchain {
@@ -17,9 +21,18 @@ java {
     }
 }
 
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
 application {
     // Define the main class for the application.
     mainClass = 'home.tests.ipaddrcounter.App'
+}
+
+test {
+    useJUnitPlatform()
 }
 
 jar {

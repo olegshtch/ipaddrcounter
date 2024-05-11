@@ -25,7 +25,6 @@ public class App {
     // ALL_NODES - all childre are set
     // BitSet(256) - otherwise on the last 4th level
     // Object[256] - otherwise on the 1st-3rd levels
-    private static Object TREE = null;
     
     public static Object[] getNewObjects() {
         if (ARRAY_POOL != null) {
@@ -47,27 +46,34 @@ public class App {
         return new BitSet(256);
     }
     
-    public static void insertIP(byte[] ip) {
+    /**
+     * Insert IP to tree
+     * 
+     * @param ip IP to insert
+     * @param tree previous tree
+     * @return new tree, could be same
+     */
+    public static Object insertIP(byte[] ip, Object tree) {
         // root
-        if (TREE == ALL_NODES) {
-            return;
+        if (tree == ALL_NODES) {
+            return tree;
         }
         boolean noFresh = true; // if is's just created then don't check for compression
         Object[] treeArr;
-        if (TREE instanceof Object[] arr) {
+        if (tree instanceof Object[] arr) {
             treeArr = arr;
-        } else if (TREE == null) {
+        } else if (tree == null) {
             treeArr = getNewObjects();
-            TREE = treeArr;
+            tree = treeArr;
             noFresh = false;
         } else {
-            return;
+            return tree;
         }
 
         // level 1
         final int ip0 = ip[0] & 0xff;
         if (treeArr[ip0] == ALL_NODES) {
-            return;
+            return tree;
         }
         boolean noFresh1 = false; // if is's just created then don't check for compression
         Object[] treeArr1;
@@ -78,13 +84,13 @@ public class App {
             treeArr[ip0] = treeArr1;
             noFresh1 = true;
         } else {
-            return;
+            return tree;
         }
         
         // level 2
         final int ip1 = ip[1] & 0xff;
         if (treeArr1[ip1] == ALL_NODES) {
-            return;
+            return tree;
         }
         boolean noFresh2 = false; // if is's just created then don't check for compression
         Object[] treeArr2;
@@ -95,13 +101,13 @@ public class App {
             treeArr1[ip1] = treeArr2;
             noFresh2 = true;
         } else {
-            return;
+            return tree;
         }
         
         // leaves
         final int ip2 = ip[2] & 0xff;
         if (treeArr2[ip2] == ALL_NODES) {
-            return;
+            return tree;
         }
         boolean noFresh3 = true; // if is's just created then don't check for compression
         BitSet treeArr3;
@@ -112,7 +118,7 @@ public class App {
             treeArr2[ip2] = treeArr3;
             noFresh3 = true;
         } else {
-            return;
+            return tree;
         }
         final int ip3 = ip[3] & 0xff;
         treeArr3.set(ip3);
@@ -122,62 +128,65 @@ public class App {
             BITSET_POOL = treeArr3;
             treeArr2[ip2] = ALL_NODES;
         } else {
-            return;
+            return tree;
         }
 
         if (noFresh2) {
             for (int i = 0; i < 256; i ++) {
                 if (treeArr2[i] != ALL_NODES) {
-                    return;
+                    return tree;
                 }
             }
             ARRAY_POOL = treeArr2;
             treeArr1[ip1] = ALL_NODES;
         } else {
-            return;
+            return tree;
         }
         
         if (noFresh1) {
             for (int i = 0; i < 256; i ++) {
                 if (treeArr1[i] != ALL_NODES) {
-                    return;
+                    return tree;
                 }
             }
             ARRAY_POOL = treeArr1;
             treeArr[ip0] = ALL_NODES;           
         } else {
-            return;
+            return tree;
         }
         
         if (noFresh) {
             for (int i = 0; i < 256; i ++) {
                 if (treeArr[i] != ALL_NODES) {
-                    return;
+                    return tree;
                 }
             }
-            TREE = ALL_NODES;
+            tree = ALL_NODES;
         }
+        return tree;
     }
     
-    public static void readIPs(InputStream is) throws IOException {
+    public static Object readIPs(InputStream is) throws IOException {
         try (var bis = new BufferedInputStream(is)) {
             int currentByte = 0;
             byte[] bytes = new byte[4];
 
             int ch;
+            Object tree = null;
             while ((ch = bis.read()) != -1) {
                 if (ch == (int)'.') {
                     currentByte++;
                 } else if (ch == (int)'\n') {
                     // ToDo: process IP
                     //System.out.println("Line: " + (bytes[0] & 0xff) + "." + (bytes[1] & 0xff) + "." + (bytes[2] & 0xff) + "."+ (bytes[3] & 0xff));
-                    insertIP(bytes);
+                    tree = insertIP(bytes, tree);
                     currentByte = 0;
                     bytes[0] = bytes[1] = bytes[2] = bytes[3] = 0;
                 } else if (ch >= (int)'0' && ch <= (int)'9') {
                     bytes[currentByte] = (byte)(bytes[currentByte] * 10 + (ch - (int)'0'));
                 }
             }
+            return tree;
         }
     }
     
@@ -204,10 +213,11 @@ public class App {
             var entries = zip.entries();
             if (entries.hasMoreElements()) {
                 var entry = entries.nextElement();
+                Object tree;
                 try (var is = zip.getInputStream(entry)) {
-                    readIPs(is);
+                    tree = readIPs(is);
                 }
-                System.out.println("Count: " + countIPs(TREE, 256L*256*256*256));
+                System.out.println("Count: " + countIPs(tree, 256L*256*256*256));
             }
         }
     }
