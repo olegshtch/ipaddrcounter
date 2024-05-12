@@ -11,21 +11,34 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.zip.ZipFile;
 
+/**
+ * Application of ip counter
+ * 
+ * @author olegshtch
+ */
 public class App {
 
-    // leaf of IPs trees means all children are set
+    /**
+     * Leaf of IPs trees means all children are set
+     */
     static final Object ALL_NODES = new Object();
     
-    // temp objects to reduce allocations
+    /**
+     * Temp {@link BitSet} to reduce allocations
+     */
     private static BitSet BITSET_POOL = null;
+    /**
+     * Temp {@link Object[]} to reduce allocations
+     */
     private static Object[] ARRAY_POOL = null;
 
-    // Tree of IPs
-    // null - no children are set
-    // ALL_NODES - all childre are set
-    // BitSet(256) - otherwise on the last 4th level
-    // Object[256] - otherwise on the 1st-3rd levels
-    
+    /**
+     * Get new objects array
+     * 
+     * <p>Creates new object or re-uses object from pool
+     * 
+     * @return objects array of size 256
+     */
     public static Object[] getNewObjects() {
         if (ARRAY_POOL != null) {
             var result = ARRAY_POOL;
@@ -36,6 +49,13 @@ public class App {
         return new Object[256];
     }
     
+    /**
+     * Get new bit set
+     * 
+     * <p>Creates new bit set or re-uses bit set from pool
+     * 
+     * @return bit set of size 256
+     */
     public static BitSet getNewBitSet() {
         if (BITSET_POOL != null) {
             var result = BITSET_POOL;
@@ -48,6 +68,14 @@ public class App {
     
     /**
      * Insert IP to tree
+     * 
+     * <p>Tree is consists from next nodes:
+     * <ul>
+     * <li>null - no children are set</li>
+     * <li>ALL_NODES - all childre are set</li>
+     * <li>BitSet(256) - otherwise on the last 4th level</li>
+     * <li>Object[256] - otherwise on the 1st-3rd levels</li>
+     * </ul>
      * 
      * @param ip IP to insert
      * @param tree previous tree
@@ -166,6 +194,13 @@ public class App {
         return tree;
     }
     
+    /**
+     * Read IPs from {@link InputStream}
+     * 
+     * @param is input stream
+     * @return the tree
+     * @throws IOException IO error occurred
+     */
     public static Object readIPs(InputStream is) throws IOException {
         try (var bis = new BufferedInputStream(is)) {
             int currentByte = 0;
@@ -177,7 +212,6 @@ public class App {
                 if (ch == (int)'.') {
                     currentByte++;
                 } else if (ch == (int)'\n') {
-                    // ToDo: process IP
                     //System.out.println("Line: " + (bytes[0] & 0xff) + "." + (bytes[1] & 0xff) + "." + (bytes[2] & 0xff) + "."+ (bytes[3] & 0xff));
                     if (currentByte == 3) {
                         tree = insertIP(bytes, tree);
@@ -195,6 +229,13 @@ public class App {
         }
     }
     
+    /**
+     * Count IP in the tree
+     * 
+     * @param tree the tree
+     * @param all_nodes_count value of {@link #ALL_NODES}
+     * @return count of IPs
+     */
     public static long countIPs(Object tree, long all_nodes_count) {
         if (tree == ALL_NODES) {
             return all_nodes_count;
@@ -213,6 +254,12 @@ public class App {
         return sum;
     }
     
+    /**
+     * Application entry point
+     * 
+     * @param args application arguments, path to ZIP archive with file with IPs
+     * @throws IOException IO error occurred
+     */
     public static void main(String[] args) throws IOException {
         try (var zip = new ZipFile(new File(args[0]), ZipFile.OPEN_READ)) {
             var entries = zip.entries();
